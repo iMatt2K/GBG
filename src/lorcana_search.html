@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>About — GBG</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="logo" href="../index.html">
+                <img src="../assets/GBGOfficialLogo.png" alt="GBG logo — Goat Bounce Goat" />
+            </a>
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+            </div>
+            <nav id="siteNav" class="site-nav">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="lorcana_search.html">Lorcana</a></li>
+                    <li><a href="tier_lists.html">Tier List</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <header class="lorcana-header">
+        <h1>Lorcana Card Search</h1>
+        <form id="searchForm" class="lorcana-search-form">
+            <input id="lorcastSearch" type="text" class="lorcana-search-input" placeholder="Search Lorcana cards..."
+                required>
+            <button id="searchBtn" type="submit" class="lorcana-search-button">Search</button>
+        </form>
+    </header>
+
+    <main>
+        <div id="results" class="lorcana-results-grid"></div>
+    </main>
+
+    <script>
+        const baseUrl = 'https://api.lorcast.com/v0';
+
+        async function searchCards(query) {
+            const url = `${baseUrl}/cards/search?q=${encodeURIComponent(query)}`;
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('API error ' + res.status);
+                const data = await res.json();
+                displayCards(data.results || []);
+            } catch (err) {
+                console.error(err);
+                const container = document.getElementById('results');
+                container.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:red;">Error fetching cards: ${err.message}</p>`;
+            }
+        }
+
+        function displayCards(cards) {
+            const container = document.getElementById('results');
+            container.innerHTML = '';
+
+            if (cards.length === 0) {
+                container.innerHTML = `<p style="grid-column:1/-1;text-align:center;">No cards found</p>`;
+                return;
+            }
+
+            cards.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'lorcana-card';
+
+                const img = document.createElement('img');
+                img.className = 'lorcana-card-img';
+                img.src = card.image_uris?.digital?.normal || '';
+                img.alt = card.name;
+                div.appendChild(img);
+
+                const name = document.createElement('div');
+                name.className = 'lorcana-card-name';
+                name.textContent = card.name;
+                div.appendChild(name);
+
+                const price = document.createElement('div');
+                price.className = 'lorcana-card-price';
+                const usdPrice = card.prices?.usd;
+                price.textContent = usdPrice ? `$${usdPrice}` : 'Price N/A';
+                div.appendChild(price);
+
+                container.appendChild(div);
+            });
+        }
+
+        // handle search form
+        document.getElementById('searchForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const query = document.getElementById('lorcastSearch').value.trim();
+            if (query) searchCards(query);
+        });
+    </script>
+
+    <!-- Modal for zoomed card -->
+    <div id="cardModal" class="lorcana-card-modal">
+        <span class="lorcana-card-modal-close">&times;</span>
+        <img class="lorcana-card-modal-content" id="modalImage">
+        <div id="modalCaption" class="lorcana-card-modal-caption"></div>
+    </div>
+
+    <script>
+        // Modal logic
+        const modal = document.getElementById('cardModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalCaption = document.getElementById('modalCaption');
+        const modalClose = document.querySelector('.lorcana-card-modal-close');
+
+        // Open modal when a card is clicked
+        document.getElementById('results').addEventListener('click', (e) => {
+            const card = e.target.closest('.lorcana-card');
+            if (!card) return;
+            const img = card.querySelector('.lorcana-card-img');
+            if (!img) return;
+
+            modal.style.display = 'flex';
+            modalImg.src = img.src;
+            modalCaption.textContent = card.querySelector('.lorcana-card-name').textContent;
+        });
+
+        // Close modal
+        modalClose.onclick = () => {
+            modal.style.display = 'none';
+        };
+
+        // Close modal when clicking outside the image
+        modal.onclick = (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        };
+    </script>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

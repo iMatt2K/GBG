@@ -28,7 +28,7 @@ This repository provides the basic structure for a small responsive website incl
    ```
 
 4. **Edit content**
-   - Modify `src/index.html`, `src/about.html`, `src/projects.html`, `src/contact.html` to suit your needs.
+   - Modify `src/index.html`, `src/about.html`, `src/lorcana_search.html`, `src/tier_lists.html`, `src/contact.html` to suit your needs.
    - Update styles in `css/style.css` or add new scripts in `js/main.js`.
 
 ## Project Structure
@@ -44,7 +44,7 @@ Website/
 ├── src/
 │   ├── index.html
 │   ├── about.html
-│   ├── projects.html
+│   ├── tier_lists.html
 │   └── contact.html
 ├── index.html           # home page (moved to root)
 └── README.md
