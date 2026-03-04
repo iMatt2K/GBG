@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Projects — GBG</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="./index.html">
+        <img src="../assets/GBGOfficialLogo.png" alt="GBG logo — Goat Bounce Goat" />
+      </a>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+      </div>
+      <nav id="siteNav" class="site-nav">
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="projects.html">Tier List</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container" style="padding:3rem 0">
+      <h1>Tier List Creator</h1>
+      <p>Choose how many tiers you want and then drag logos into them.</p>
+      <div id="headerBox" style="padding:1rem;margin-bottom:2rem">
+        <div class="controls" style="display:flex;align-items:center;gap:1rem">
+          <span style="font-weight:bold;">Tiers:</span>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <button id="minusTiers" class="btn" style="width:40px;height:40px;padding:0;font-size:20px;font-weight:bold;background:#333;color:#fff">−</button>
+            <button id="makeTiers" class="btn" style="width:40px;height:40px;padding:0;font-size:20px;font-weight:bold;background:#333;color:#fff">+</button>
+          </div>
+          <button id="snapshotBtn" class="btn">Snapshot</button>
+        </div>
+      </div>
+      <div id="listName" contenteditable="true" style="font-weight:bold;margin-bottom:4px;font-size:1.25rem;min-width:200px;">Tier List</div>
+      <div id="tiers" style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem"></div>
+      <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:2rem">Add logos: <input id="logoInput" type="file" multiple accept="image/*"></label>
+      <div id="logos" style="margin-bottom:2rem;padding:1rem;background:var(--card-bg);border-radius:8px;display:flex;gap:8px;flex-wrap:wrap;min-height:60px;align-content:flex-start"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 GBG</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+  // tier list logic
+  document.addEventListener('DOMContentLoaded',function(){
+    const tierContainer = document.getElementById('tiers');
+    const listNameEl = document.getElementById('listName');
+
+    const logoInput = document.getElementById('logoInput');
+    const logosDiv = document.getElementById('logos');
+    let currentTierCount = 3;
+
+    // update title when name changes
+
+
+    // helper function to create a logo wrapper with delete button
+    function createLogoWrapper(dataUrl) {
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.width = '48px';
+      wrapper.style.height = '48px';
+      wrapper.style.display = 'inline-block';
+      
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.draggable = true;
+      const id = 'logo_'+Math.random().toString(36).substr(2,9);
+      img.id = id;
+      wrapper.id = 'wrapper_'+id;
+      img.style.width='64px';
+      img.style.height='64px';
+      img.style.cursor='grab';
+      img.addEventListener('dragstart', ev=>{
+        ev.dataTransfer.setData('text/plain', wrapper.id);
+      });
+      wrapper.appendChild(img);
+      
+      // delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '×';
+      deleteBtn.style.position = 'absolute';
+      deleteBtn.style.top = '-6px';
+      deleteBtn.style.right = '-6px';
+      deleteBtn.style.width = '16px';
+      deleteBtn.style.height = '16px';
+      deleteBtn.style.padding = '0';
+      deleteBtn.style.backgroundColor = '#ff4444';
+      deleteBtn.style.color = 'white';
+      deleteBtn.style.border = 'none';
+      deleteBtn.style.borderRadius = '50%';
+      deleteBtn.style.cursor = 'pointer';
+      deleteBtn.style.fontSize = '12px';
+      deleteBtn.style.lineHeight = '1';
+      deleteBtn.style.display = 'flex';
+      deleteBtn.style.alignItems = 'center';
+      deleteBtn.style.justifyContent = 'center';
+      deleteBtn.addEventListener('click', e=>{
+        e.preventDefault();
+        wrapper.remove();
+      });
+      wrapper.appendChild(deleteBtn);
+      
+      return wrapper;
+    }
+
+    const colorPalette = ['#3a3a3a','#4a3a3a','#3a4a3a','#4a4a3a','#3a3a4a','#4a3a4a','#3a4a4a','#4a4a4a']; // dark base colors
+    function createTiers(n){
+      tierContainer.innerHTML = '';
+      for(let i=0;i<n;i++){
+        const tier = document.createElement('div');
+        tier.className='tier';
+        tier.dataset.index=i+1;
+        tier.id = 'tier_'+i; // enable dragging identification
+        // apply default color from palette
+        const defaultColor = colorPalette[i % colorPalette.length];
+        tier.style.backgroundColor = defaultColor;
+        // header container with editable name + color picker
+        const headerContainer = document.createElement('div');
+        headerContainer.style.display='flex';
+        headerContainer.style.alignItems='center';
+        headerContainer.style.justifyContent='space-between';
+        headerContainer.style.width='100%';
+
+        const header = document.createElement('div');
+        header.contentEditable = true;
+        header.textContent = `Tier ${i+1}`;
+        header.style.fontWeight='bold';
+        header.style.marginBottom='4px';
+        header.style.width='auto';
+        header.style.color = '#ffffff'; // ensure readable on dark background
+        headerContainer.appendChild(header);
+
+        // color picker on right
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = defaultColor; // start with palette color
+        colorInput.style.width = '24px';
+        colorInput.style.height = '24px';
+        colorInput.style.padding = '0';
+        colorInput.style.borderRadius = '50%';
+        // margin no longer needed since container uses space-between
+        colorInput.style.appearance = 'none';
+        colorInput.style.border = '1px solid #ccc';
+        colorInput.style.alignSelf = 'center';
+        colorInput.addEventListener('input', () => {
+          tier.style.backgroundColor = colorInput.value;
+          // keep text white for contrast
+          const hdr = tier.querySelector('[contenteditable]');
+          if(hdr) hdr.style.color = '#ffffff';
+        });
+        headerContainer.appendChild(colorInput);
+
+        tier.appendChild(headerContainer);
+
+        tier.addEventListener('dragover', e=>e.preventDefault());
+        tier.addEventListener('drop', e=>{
+          e.preventDefault();
+          const data = e.dataTransfer.getData('text/plain');
+          // only handle logo wrappers here (id starts with wrapper_)
+          if(data.startsWith('wrapper_')){
+            const wrapper = document.getElementById(data);
+            if(wrapper) tier.appendChild(wrapper);
+          }
+        });
+
+        // enable dragging tiers themselves
+        tier.draggable = true;
+        tier.addEventListener('dragstart', ev=>{
+          ev.dataTransfer.setData('text/plain', tier.id);
+          // allow move effect
+          ev.dataTransfer.effectAllowed = 'move';
+        });
+        // when another tier dragged over this one
+        tier.addEventListener('dragover', ev=>{
+          ev.preventDefault();
+          ev.dataTransfer.dropEffect = 'move';
+        });
+        tier.addEventListener('drop', ev=>{
+          ev.preventDefault();
+          const draggedId = ev.dataTransfer.getData('text/plain');
+          // only process tier items
+          if(draggedId && draggedId.startsWith('tier_')){
+            const dragged = document.getElementById(draggedId);
+            if(dragged && dragged !== tier){
+              tierContainer.insertBefore(dragged, tier);
+            }
+          }
+        });
+        tierContainer.appendChild(tier);
+      }
+    }
+
+    document.getElementById('makeTiers').addEventListener('click',()=>{
+      currentTierCount = Math.max(1, currentTierCount + 1);
+      createTiers(currentTierCount);
+    });
+    
+    document.getElementById('minusTiers').addEventListener('click',()=>{
+      currentTierCount = Math.max(1, currentTierCount - 1);
+      createTiers(currentTierCount);
+    });
+
+    // make logos div droppable
+    logosDiv.addEventListener('dragover', e=>e.preventDefault());
+    logosDiv.addEventListener('drop', e=>{
+      e.preventDefault();
+      const wrapperId = e.dataTransfer.getData('text/plain');
+      const wrapper = document.getElementById(wrapperId);
+      if(wrapper) logosDiv.appendChild(wrapper);
+    });
+
+    logoInput.addEventListener('change', e=>{
+      Array.from(e.target.files).forEach(file=>{
+        const reader = new FileReader();
+        reader.onload = () => {
+          const wrapper = createLogoWrapper(reader.result);
+          logosDiv.appendChild(wrapper);
+        };
+        reader.readAsDataURL(file);
+      });
+      // reset input so same file can be added again
+      e.target.value = '';
+    });
+
+    // initialize default tiers
+    createTiers(currentTierCount);
+
+    // snapshot functionality
+    const snapshotBtn = document.getElementById('snapshotBtn');
+    snapshotBtn.addEventListener('click', ()=>{
+      console.log('Snapshot clicked');
+      if(typeof html2canvas === 'undefined'){
+        alert('html2canvas library not loaded. Check CDN connection.');
+        console.error('html2canvas is not defined');
+        return;
+      }
+      console.log('Starting html2canvas...');
+      
+      // always use dark mode for snapshot
+      const bgColor = '#1a1a1a';
+      const textColor = '#ffffff';
+      const mutedColor = '#999';
+      
+      // create a wrapper div with clean layout
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '30px';
+      wrapper.style.backgroundColor = bgColor;
+      wrapper.style.color = textColor;
+      wrapper.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+      wrapper.style.fontSize = '16px'; // keep snapshot text at default size
+      wrapper.style.width = '800px';
+      
+      // add list name if available
+      if(listNameEl && listNameEl.textContent.trim()){
+        const title = document.createElement('h1');
+        title.textContent = listNameEl.textContent.trim();
+        title.style.margin = '0 0 30px 0';
+        title.style.fontSize = '32px';
+        title.style.color = textColor;
+        wrapper.appendChild(title);
+      }
+      
+      // iterate through each tier (skip the logos div which is now outside tiers)
+      tierContainer.querySelectorAll('.tier').forEach((tier, idx) => {
+        // get tier name from editable header
+        const tierHeader = tier.querySelector('[contenteditable]');
+        const tierName = tierHeader ? tierHeader.textContent : `Tier ${idx + 1}`;
+        
+        // create tier section
+        const tierSection = document.createElement('div');
+        tierSection.style.marginBottom = '25px';
+        
+        // tier name
+        const tierNameEl = document.createElement('h2');
+        tierNameEl.textContent = tierName;
+        tierNameEl.style.margin = '0 0 12px 0';
+        tierNameEl.style.fontSize = '18px';
+        tierNameEl.style.color = mutedColor;
+        tierNameEl.style.fontWeight = 'normal';
+        tierSection.appendChild(tierNameEl);
+        
+        // tier images container
+        const imagesContainer = document.createElement('div');
+        imagesContainer.style.display = 'flex';
+        imagesContainer.style.flexWrap = 'wrap';
+        imagesContainer.style.gap = '12px';
+        
+        // get all images in this tier (excluding the header)
+        const images = tier.querySelectorAll('img');
+        images.forEach(img => {
+          const imgClone = img.cloneNode(true);
+          imgClone.style.width = '48px';
+          imgClone.style.height = '48px';
+          imgClone.style.objectFit = 'contain';
+          imagesContainer.appendChild(imgClone);
+        });
+        
+        tierSection.appendChild(imagesContainer);
+        wrapper.appendChild(tierSection);
+      });
+      
+      // temporarily add to DOM for screenshot
+      document.body.appendChild(wrapper);
+      
+      html2canvas(wrapper, {
+        backgroundColor: bgColor,
+        scale: 2
+      }).then(canvas=>{
+        console.log('Canvas generated, downloading...');
+        const link = document.createElement('a');
+        link.download = 'tier-list.png';
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        document.body.removeChild(wrapper);
+        console.log('Download initiated');
+      }).catch(err=>{
+        console.error('Snapshot error:', err);
+        alert('Snapshot failed: '+err.message);
+        document.body.removeChild(wrapper);
+      });
+    });
+  });
+  </script>
+</body>
+</html>

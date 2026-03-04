@@ -19,16 +19,16 @@ This repository provides the basic structure for a small responsive website incl
    ```
 
 2. **Place assets**
-   Put the `GBGOfficialLogo.png` image in the `assets/` folder.  The site header uses `assets/GBGOfficialLogo.png`.
+   Put the `GBGOfficialLogo.png` image in the `assets/` folder. The site header uses it from the appropriate relative path.
 
 3. **Serve locally**
    ```bash
    python -m http.server 8000
-   # open http://localhost:8000 in your browser
+   # open http://localhost:8000/ in your browser (home page is at root)
    ```
 
 4. **Edit content**
-   - Modify `index.html`, `about.html`, `projects.html`, `contact.html` to suit your needs.
+   - Modify `src/index.html`, `src/about.html`, `src/projects.html`, `src/contact.html` to suit your needs.
    - Update styles in `css/style.css` or add new scripts in `js/main.js`.
 
 ## Project Structure
@@ -41,10 +41,12 @@ Website/
 │   └── style.css
 ├── js/
 │   └── main.js
-├── index.html
-├── about.html
-├── projects.html
-├── contact.html
+├── src/
+│   ├── index.html
+│   ├── about.html
+│   ├── projects.html
+│   └── contact.html
+├── index.html           # home page (moved to root)
 └── README.md
 ```
 
