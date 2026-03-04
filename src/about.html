@@ -4,8 +4,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>About — GBG</title>
+  <title>About — GBG Lorcana Colorado</title>
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Hero image section */
+    .hero-mountains {
+      background: url('../assets/colorado_mountains.jpg') center/cover no-repeat;
+      height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .hero-mountains h1 {
+      font-size: 2.5rem;
+      text-align: center;
+    }
+
+    /* Community section */
+    .community {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .community img {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .community img:hover {
+      transform: scale(1.05);
+    }
+
+    .community-text {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    /* Callout box for events */
+    .events {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 800px) {
+      .community {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .hero-mountains h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -30,11 +96,25 @@
   </header>
 
   <main>
-    <section class="container" style="padding:3rem 0">
-      <h1>About GBG</h1>
-      <p>This is the About page. Add information about the site, the project, or the team here.</p>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
-    </section>
+    <section class="container" style="padding:2rem 0">
+      <!-- Hero section with mountains -->
+      <div class="hero-mountains">
+        <h1>Colorado Lorcana Community</h1>
+      </div>
+
+      <h2>Welcome Lorcana Fans!</h2>
+      <p>GBG is proud to support the thriving Lorcana tabletop community in Colorado. Whether you’re a
+        seasoned player or just discovering the magic, we’re here to help you connect, play, and share
+        your passion for the game.</p>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <div id="map" style="height: 400px;"></div>
+    <script>
+      var map = L.map('map').setView([39.6, -104.9], 9);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      // ... add other markers here
+    </script>
   </main>
 
   <footer class="site-footer">
