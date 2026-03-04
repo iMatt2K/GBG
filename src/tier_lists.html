@@ -47,11 +47,15 @@
       <div id="listName" contenteditable="true"
         style="font-weight:bold;margin-bottom:4px;font-size:1.25rem;min-width:200px;">Tier List</div>
       <div id="tiers" style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem"></div>
+      <button id="importAssetsBtn" class="btn" style="margin-bottom:2rem">
+        Import All Ink Combos
+      </button>
       <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:2rem">Add logos: <input id="logoInput"
           type="file" multiple accept="image/*"></label>
       <div id="logos"
         style="margin-bottom:2rem;padding:1rem;background:var(--card-bg);border-radius:8px;display:flex;gap:8px;flex-wrap:wrap;min-height:60px;align-content:flex-start">
       </div>
+
     </section>
   </main>
 
@@ -73,7 +77,31 @@
       const logosDiv = document.getElementById('logos');
       let currentTierCount = 3;
 
-      // update title when name changes
+      // List of all images in assets/ink_combos
+      const inkCombos = [
+        '../assets/ink_combos/AmberAmethyst.jpg',
+        '../assets/ink_combos/AmberEmerald.jpg',
+        '../assets/ink_combos/AmberRuby.jpg',
+        '../assets/ink_combos/AmberSapphire.jpg',
+        '../assets/ink_combos/AmberSteel.jpg',
+        '../assets/ink_combos/AmethystEmerald.jpg',
+        '../assets/ink_combos/AmethystRuby.jpg',
+        '../assets/ink_combos/AmethystSapphire.jpg',
+        '../assets/ink_combos/AmethystSteel.jpg',
+        '../assets/ink_combos/EmeraldRuby.jpg',
+        '../assets/ink_combos/EmeraldSapphire.jpg',
+        '../assets/ink_combos/EmeraldSteel.jpg',
+        '../assets/ink_combos/RubySapphire.jpg',
+        '../assets/ink_combos/RubySteel.jpg',
+        '../assets/ink_combos/SapphireSteel.jpg'
+      ];
+
+      document.getElementById('importAssetsBtn').addEventListener('click', () => {
+        inkCombos.forEach(src => {
+          const wrapper = createLogoWrapper(src);
+          logosDiv.appendChild(wrapper);
+        });
+      });
 
 
       // helper function to create a logo wrapper with delete button
